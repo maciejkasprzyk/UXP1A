@@ -163,6 +163,8 @@ assignment:
  	VARNAME EQUALS text {
 		log_trace("set_variable(%s,%s)",$1,$3);
 		set_variable($1,$3);
+		free($1);
+		free($3);
 		$$=$1;
 	}
 text:
@@ -175,27 +177,29 @@ text:
 		strcat(s,$1);
 		strcat(s,"=");
 		strcat(s,$3);
-		free_me = s;
+		free($1);
+		free($3);
 		$$ = s;
 	}
 
 text1:
-	WORD {
-		// log_trace("WORD"); $$ = $1;
-	}
-	| VARNAME {
-		// log_trace("VARNAME %s", $1); $$ = $1;
-	}
-	| STRING {
+	STRING {
 		// log_trace("STRING"); $$ = $1;
 	}
 	| STRING2 {
 		// log_trace("STRING2"); $$ = $1;
 	}
+	| WORD {
+		// log_trace("WORD"); $$ = $1;
+	}
+	| VARNAME {
+		// log_trace("VARNAME %s", $1); $$ = $1;
+	}
+
 %%
 
 void yyerror (char const *s) {
    	extern char *yytext;
-   	printf("syntax error: %s at %s\n", s, yytext);
+   	printf("%s at %s\n", s, yytext);
 	parse_error = 1;
  }

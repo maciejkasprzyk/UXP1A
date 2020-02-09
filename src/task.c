@@ -21,7 +21,7 @@ void run_program(Proc *proc) {
         }
     }
 
-    struct sigaction act;
+    struct sigaction act = {0};
     act.sa_handler = SIG_DFL; // dfl - default
     act.sa_flags = 0;
 
@@ -31,7 +31,7 @@ void run_program(Proc *proc) {
     sigaction(SIGTTOU, &act, NULL);
   
     execvp(proc->argv[0], proc->argv);
-    printf("Nie udało się uruchomić zadania %s\n", proc->argv[0]);
+    printf("Nie udalo sie uruchomic zadania %s\n", proc->argv[0]);
     exit(7);
 }
 
@@ -83,6 +83,9 @@ bool run_builtin(Proc *proc) {
     } else if (strcmp(proc->argv[0], "export") == 0) {
         export_cmd(proc->argv);
         return true;
+    } else if (strcmp(proc->argv[0], "unset") == 0) {
+        unset_cmd(proc->argv);
+        return true;
     } else if (strcmp(proc->argv[0], "exit") == 0) {
         exit(0);
     }
@@ -126,7 +129,8 @@ void run_task() {
             pid = fork();
             if (pid == 0) {
                 // zamykamy wyjscie utworzonego przez nas potoku, bo z niego bedzie czytal nastepny proces
-                close(fd[0]);
+                if(tmp->next)
+                    close(fd[0]);
                 // zamykamy deskryptory do zapamietaniu stanu macierzystego
                 close(our_stdin);
                 close(our_stdout);
